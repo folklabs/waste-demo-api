@@ -1,0 +1,9 @@
+---
+- id: 1
+  name: Recycling
+  frequency: weekly
+  last_collections:
+    - 1 June 2015
+    - 7 June 2015
+  next_collection: 15 June 2015
+  # container_types:

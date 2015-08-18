@@ -1,0 +1,17 @@
+--- !map:HashWithIndifferentAccess
+- id: 1
+  type: Not presented
+  start_date: 1 June 2015
+  uprn: '123456789'
+  lat: 1.1
+  long: 1
+  round: '1234'
+
+- id: 2
+  type: Too heavy
+  start_date: 10 June 2015
+  uprn: '123456789'
+  lat: 1.1
+  long: 1
+  round: '1235'
+

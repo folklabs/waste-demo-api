@@ -1,0 +1,7 @@
+---
+- id: 1
+  color: black
+  shape: wheelie bin
+  size: '240L'
+  lid_color: green
+  material_stream: mixed recycling
