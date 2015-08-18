@@ -20,7 +20,7 @@ helpers do
   end
 
   def get_data_json(data_type)
-    data = JSON.parse(File.read("../waste-service-standards/examples/#{data_type}.json"))
+    data = JSON.parse(File.read("examples/#{data_type}.json"))
     if data.kind_of?(Array)
       objects = data.map do |e|
         hash = Hash[e.map{|(k,v)| [k.to_sym, v]}]
@@ -32,7 +32,7 @@ helpers do
   end
 
   def get_json(data_type)
-    data = File.read("../waste-service-standards/examples/#{data_type}.json")
+    data = File.read("examples/#{data_type}.json")
   end
 end
 
