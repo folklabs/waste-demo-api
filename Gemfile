@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 ruby '2.2.2'
 
 gem "sinatra"
+gem "sinatra-contrib"
 gem "tilt-jbuilder", ">= 0.4.0", :require => "sinatra/jbuilder"
 
 gem "hashie"

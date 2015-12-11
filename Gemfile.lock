@@ -10,6 +10,7 @@ GEM
     akami (1.3.1)
       gyoku (>= 0.4.0)
       nokogiri
+    backports (3.6.6)
     builder (3.2.2)
     dotenv (2.0.2)
     gyoku (1.3.1)
@@ -32,6 +33,8 @@ GEM
     rack-cors (0.4.0)
     rack-protection (1.5.3)
       rack
+    rack-test (0.6.3)
+      rack (>= 1.0)
     savon (2.11.1)
       akami (~> 1.2)
       builder (>= 2.1.2)
@@ -43,6 +46,13 @@ GEM
     sinatra (1.4.6)
       rack (~> 1.4)
       rack-protection (~> 1.4)
+      tilt (>= 1.3, < 3)
+    sinatra-contrib (1.4.6)
+      backports (>= 2.0)
+      multi_json
+      rack-protection
+      rack-test
+      sinatra (~> 1.4.0)
       tilt (>= 1.3, < 3)
     thread_safe (0.3.5)
     tilt (2.0.1)
@@ -64,6 +74,7 @@ DEPENDENCIES
   rack-cors
   savon (~> 2.0)
   sinatra
+  sinatra-contrib
   tilt-jbuilder (>= 0.4.0)
 
 BUNDLED WITH

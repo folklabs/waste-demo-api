@@ -10,6 +10,7 @@ Dotenv.load
 
 require 'json'
 require 'sinatra'
+require 'sinatra/config_file'
 require 'tilt/jbuilder'
 require 'sinatra/jbuilder'
 require 'ostruct'
@@ -18,46 +19,55 @@ require "hashie"
 require 'collective/api'
 
 
-get '/' do
-  "Hello world!\n"
-end
+TWO_WEEKS = 60*60*24*14
+
+
+config_file 'config.yml'
 
 helpers do
-#   def get_data(data_type)
-#     data = YAML.load_file("spec/data/#{data_type}.yml")
-#     objects = data.map do |e|
-#       hash = Hash[e.map{|(k,v)| [k.to_sym, v]}]
-#       obj = OpenStruct.new(hash)
-#     end
-#   end
+  def collections_in_date_range(uprn, service, start_date, end_date)
+    tasks = Collective::Api::Task.all({'UPRN'=> uprn, 'schedule_start'=> "#{start_date},#{end_date}", 'Jobs_Bounds' =>'', 'show_events' => 'true'})
+    matched_tasks = tasks.select do |task|
+      is_valid = false
+      service.container_types.each { |ct| is_valid = true if task.name.downcase.include?(ct.name.downcase) }
+      is_valid
+    end
+  end
 
-#   def get_data_json(data_type)
-#     data = JSON.parse(File.read("examples/#{data_type}.json"))
-#     if data.kind_of?(Array)
-#       objects = data.map do |e|
-#         hash = Hash[e.map{|(k,v)| [k.to_sym, v]}]
-#         event = OpenStruct.new(hash)
-#       end
-#     else
-#       object = OpenStruct.new(Hash[data])
-#     end
-#   end
+  def last_collections(uprn, service)
+      date_2_weeks_ago = DateTime.parse((Time.now - TWO_WEEKS).to_s)
+      tasks = collections_in_date_range(uprn, service, date_2_weeks_ago, DateTime.now.iso8601)
+  end
 
-#   def get_json(data_type)
-#     data = File.read("examples/#{data_type}.json")
-#   end
+  def next_collections(uprn, service)
+    date_2_weeks_ahead = DateTime.parse((Time.now + TWO_WEEKS).to_s)
+    tasks = collections_in_date_range(uprn, service, DateTime.now.iso8601, date_2_weeks_ahead)
+  end
+end
+
+
+before do
+  halt 403 unless request.env['HTTP_AUTH'] == ENV['HTTP_AUTH']
 end
 
 
 get '/services' do
-  # @services = Collective::Api::Service.all
+  @services = settings.services.map { |s| Hashie::Mash.new(s) }
 
   jbuilder :'services/index'
 end
 
 
+get '/services/:id' do
+  @service = settings.services[params['id']]
+
+  jbuilder :'services/show'
+end
+
+
 get '/events' do
   @events = Collective::Api::WasteEvent.all(request.query_parameters)
+
   jbuilder :'events/index'
 end
 
@@ -76,7 +86,8 @@ end
 
 
 get '/sites/:id' do
-  puts params['id']
+  # puts params['id']
+  # puts settings.services
   @site = Collective::Api::Site.find(params[:id])
 
   jbuilder :'sites/show'

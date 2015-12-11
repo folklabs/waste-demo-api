@@ -14,8 +14,6 @@ module Collective
     end
 
     def self.method_missing(m, *args, &block)  
-      puts 'method_missing'
-      puts args
       session = Collective::Session.new
       args = {} if args.size == 0
       args = args[0] if args.size == 1

@@ -1,0 +1,24 @@
+---
+
+services:
+  - id: 1
+    name: Black bins/sacks
+    container_types:
+      - name: Black 240L
+        description:
+  - id: 2
+    name: Recycling
+    container_types:
+      - name: Green 240L
+        description:
+  - id: 3
+    name: Garden waste
+    container_types:
+      - name: Brown 240L
+        description:
+  - id: 4
+    name: Glass collection
+    container_types:
+      - name: Black Box 55L
+        description:
+
