@@ -49,7 +49,7 @@ end
 before do
   logger.info(request.env['HTTP_AUTH'])
   logger.info(ENV['HTTP_AUTH'])
-  halt 403 unless request.env['HTTP_AUTH'] == ENV['HTTP_AUTH']
+  halt 403 unless request.env['HTTP_AUTH'] != nil and request.env['HTTP_AUTH'] == ENV['HTTP_AUTH']
 end
 
 
