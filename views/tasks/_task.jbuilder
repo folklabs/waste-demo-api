@@ -1,12 +1,14 @@
-json.set! '@id', "#{request.base_url}/api/tasks/#{task.id}"
+json.set! '@id', "#{request.base_url}/tasks/#{task.id}"
 # TODO: handle different task types
 json.set! '@type', 'EmptyBinTask'
 json.(task, :name, :scheduled_time, :start_time)
-json.set! 'uprn', params['uprn']
+json.location do
+  json.set! 'uprn', task.location.uprn
+end
 json.set! 'status', task.status
 
-# if defined?(params['show_events'])
-#   json.events task.events do |event|
-#     json.partial! 'api/events/event', event: event
-#   end
-# end
+if params.has_key?('show_events')
+  json.events task.events do |event|
+    json.partial! 'events/_event', event: event
+  end
+end

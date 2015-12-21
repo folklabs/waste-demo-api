@@ -14,7 +14,10 @@ module Collective::Api
       #   args[:Postcode] = args[:postcode]
       #   args.delete(:postcode)
       # end
-      puts args
+      if args['uprn']
+        args['UPRN'] = args['uprn']
+        args.delete('uprn')
+      end
       if args['schedule_start']
         # puts 'parsing date range'
         dates = args['schedule_start'].split(',')
@@ -22,7 +25,6 @@ module Collective::Api
         args[:ScheduleStart] = {MinimumDate: dates[0], MaximumDate: dates[1]}
       end
       data = Collective::Job.jobs_get(args)
-      puts data
       # puts data.count
       #TODO: nil items
       tasks = []
@@ -34,13 +36,15 @@ module Collective::Api
         end
       end
       # puts data
+      # puts JSON.pretty_generate(data)
+      tasks
       # Place.new(data[:premises])
     end
 
     def self.find(id)
       data = Collective::Job.jobs_detail_get({JobID: id})
       # puts data
-      puts JSON.pretty_generate(data)
+      # puts JSON.pretty_generate(data)
       # # TODO: data available?
       Task.new(data[:job])
     end
@@ -64,13 +68,11 @@ module Collective::Api
     end
 
     def location
-      Place.new(@json[:premises])
+      Site.new(@json[:premises])
     end
 
     def events
       data = Collective::Api::WasteEvent.all(UPRN: location.uprn, WorkPack: @json[:work_pack][:name])
-      puts 'events'
-      puts data
       data
     end
   end

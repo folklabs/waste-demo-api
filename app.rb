@@ -29,7 +29,7 @@ helpers do
     tasks = Collective::Api::Task.all({'UPRN'=> uprn, 'schedule_start'=> "#{start_date},#{end_date}", 'Jobs_Bounds' =>'', 'show_events' => 'true'})
     matched_tasks = tasks.select do |task|
       is_valid = false
-      service.container_types.each { |ct| is_valid = true if task.name.downcase.include?(ct.name.downcase) }
+      service.feature_types.each { |ct| is_valid = true if task.name.downcase.include?(ct.name.downcase) }
       is_valid
     end
   end
@@ -47,8 +47,8 @@ end
 
 
 before do
-  logger.info(request.env['HTTP_AUTH'])
-  logger.info(ENV['HTTP_AUTH'])
+  # logger.info(request.env['HTTP_AUTH'])
+  # logger.info(ENV['HTTP_AUTH'])
   halt 403 unless request.env['HTTP_AUTH'] != nil and request.env['HTTP_AUTH'] == ENV['HTTP_AUTH']
 end
 
@@ -61,7 +61,7 @@ end
 
 
 get '/services/:id' do
-  @service = settings.services[params['id']]
+  @service = Hashie::Mash.new(settings.services[params['id'].to_i])
 
   jbuilder :'services/show'
 end
@@ -75,7 +75,6 @@ end
 
 
 get '/events/:id' do
-  puts params['id']
   @event = Collective::Api::WasteEvent.find(params[:id])
 
   jbuilder :'events/show'
@@ -83,24 +82,27 @@ end
 
 get '/sites' do
   @sites = Collective::Api::Site.all(request.query_parameters)
+  
   jbuilder :'sites/index'
 end
 
 
 get '/sites/:id' do
-  # puts params['id']
-  # puts settings.services
   @site = Collective::Api::Site.find(params[:id])
 
   jbuilder :'sites/show'
 end
 
 
-# get '/tasks' do
-#   # @events = get_data('events')
+get '/tasks' do
+  puts params
+  # Getting tasks across many properties not currently supported
+  halt 501 if not params.has_key?('uprn')
 
-#   jbuilder :'tasks/index'
-# end
+  @tasks = Collective::Api::Task.all(params)
+
+  jbuilder :'tasks/index'
+end
 
 
 get '/tasks/:id' do

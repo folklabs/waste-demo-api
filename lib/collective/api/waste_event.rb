@@ -66,7 +66,7 @@ module Collective::Api
     end
 
     def location
-      Place.new({uprn: @json[:uprn], location: @json[:event_location]})
+      Site.new({uprn: @json[:uprn], location: @json[:event_location]})
     end
   end
 end
