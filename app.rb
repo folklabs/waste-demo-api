@@ -19,14 +19,34 @@ require "hashie"
 require 'collective/api'
 
 
-TWO_WEEKS = 60*60*24*14
+# 4 week time period
+DEFAULT_TIME_PERIOD = 60*60*24*28
+past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s)
+future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
 
 
 config_file 'config.yml'
 
 helpers do
-  def collections_in_date_range(uprn, service, start_date, end_date)
+  def collections_in_date_range(uprn, start_date, end_date)
     tasks = Collective::Api::Task.all({'UPRN'=> uprn, 'schedule_start'=> "#{start_date},#{end_date}", 'Jobs_Bounds' =>'', 'show_events' => 'true'})
+  end
+
+  def filter_tasks(tasks, service, start_date, end_date)
+    matched_tasks = tasks.select do |task|
+      is_valid = false
+      task_start_time = task.scheduled_time
+      if task_start_time >= start_date and task_start_time <= end_date
+        service.feature_types.each do |ct|
+          is_valid = true if task.name.downcase.include?(ct.name.downcase)
+        end
+      end
+      is_valid
+    end
+  end
+
+  def collections_in_date_range_by_service(uprn, service, start_date, end_date)
+    tasks = collections_in_date_range(uprn, start_date, end_date)
     matched_tasks = tasks.select do |task|
       is_valid = false
       service.feature_types.each { |ct| is_valid = true if task.name.downcase.include?(ct.name.downcase) }
@@ -34,14 +54,14 @@ helpers do
     end
   end
 
-  def last_collections(uprn, service)
-      date_2_weeks_ago = DateTime.parse((Time.now - TWO_WEEKS).to_s)
-      tasks = collections_in_date_range(uprn, service, date_2_weeks_ago, DateTime.now.iso8601)
+  def filter_last_collections(tasks, service)
+      past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s)
+      tasks = filter_tasks(tasks, service, past_date, DateTime.now)
   end
 
-  def next_collections(uprn, service)
-    date_2_weeks_ahead = DateTime.parse((Time.now + TWO_WEEKS).to_s)
-    tasks = collections_in_date_range(uprn, service, DateTime.now.iso8601, date_2_weeks_ahead)
+  def filter_next_collections(tasks, service)
+    future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
+    tasks = filter_tasks(tasks, service, DateTime.now, future_date)
   end
 end
 
@@ -54,6 +74,9 @@ end
 
 
 get '/services' do
+  if params['uprn']
+    @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
+  end
   @services = settings.services.map { |s| Hashie::Mash.new(s) }
 
   jbuilder :'services/index'

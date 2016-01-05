@@ -1,8 +1,7 @@
 json.set! '@id', "#{request.base_url}/services/#{service['id']}"
 json.set! '@type', 'WasteService'
 json.set! 'name', service.name
-json.(service, 'name')#, :frequency, :description)
-# json.esd_url "http://id.esd.org.uk/service/#{service.esd_id}"
+json.(service, 'name', 'esd_url')#, :frequency, :description)
 
 json.feature_types service.feature_types do |feature_type|
   # json.(feature_type, :name, :shape, :color, :lid_color, :description)
@@ -18,10 +17,12 @@ end
 # See if service is filtered to a UPRN
 if params['uprn']
   json.set! 'uprn', params['uprn']
-  json.last_collections last_collections(params['uprn'], service) do |coll|
+
+  json.last_collections filter_last_collections(@tasks, service) do |coll|
     json.partial! 'tasks/_task', task: coll
   end
-  json.next_collections next_collections(params['uprn'], service) do |coll|
+
+  json.next_collections filter_next_collections(@tasks, service) do |coll|
     json.partial! 'tasks/_task', task: coll
   end
 end
