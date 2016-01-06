@@ -62,7 +62,7 @@ module Collective::Api
     end
 
     def task_id
-      @json[:job][:id]
+      @json[:job][:id] if @json[:job]
     end
 
     def location

@@ -1,6 +1,6 @@
 json.set! '@id', "#{request.base_url}/sites/#{site.uprn}"
 json.set! '@type', 'Site'
-json.(@site, :uprn, :usrn)
+json.(site, :uprn, :usrn)
 json.geo do
   json.(site, :latitude, :longitude)
 end

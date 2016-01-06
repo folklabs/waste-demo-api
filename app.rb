@@ -69,7 +69,19 @@ end
 before do
   # logger.info(request.env['HTTP_AUTH'])
   # logger.info(ENV['HTTP_AUTH'])
-  halt 403 unless request.env['HTTP_AUTH'] != nil and request.env['HTTP_AUTH'] == ENV['HTTP_AUTH']
+  header_auth_valid = request.env['HTTP_AUTH'] != nil and request.env['HTTP_AUTH'] == ENV['HTTP_AUTH']
+  param_auth_valid = params['api_key'] != nil and params['api_key'] == ENV['HTTP_AUTH']
+  unless header_auth_valid or param_auth_valid
+    # halt 403
+  end
+end
+
+get '/' do
+  redirect to('/doc')
+end
+
+get '/doc' do
+  jbuilder :'doc/index'
 end
 
 
@@ -84,6 +96,9 @@ end
 
 
 get '/services/:id' do
+  if params['uprn']
+    @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
+  end
   @service = Hashie::Mash.new(settings.services[params['id'].to_i])
 
   jbuilder :'services/show'
@@ -91,7 +106,7 @@ end
 
 
 get '/events' do
-  @events = Collective::Api::WasteEvent.all(request.query_parameters)
+  @events = Collective::Api::WasteEvent.all(params)
 
   jbuilder :'events/index'
 end
@@ -104,7 +119,7 @@ get '/events/:id' do
 end
 
 get '/sites' do
-  @sites = Collective::Api::Site.all(request.query_parameters)
+  @sites = Collective::Api::Site.all(params)
   
   jbuilder :'sites/index'
 end
@@ -118,10 +133,6 @@ end
 
 
 get '/tasks' do
-  puts params
-  # Getting tasks across many properties not currently supported
-  halt 501 if not params.has_key?('uprn')
-
   @tasks = Collective::Api::Task.all(params)
 
   jbuilder :'tasks/index'

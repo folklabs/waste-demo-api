@@ -1,27 +1,16 @@
 module Collective::Api
   class Site < Base
     def self.all(args = {})
-      # TODO: consider generic capitalization approach
-      if args[:postcode]
-        args[:Postcode] = args[:postcode]
-        args.delete(:postcode)
-      end
+      Base.process_params(args)
       data = Collective::Premise.premises_get(args)
-      puts data
-      puts data.count
       sites = []
-      puts data[:errors][:@record_count].to_i
-      puts data[:errors]
       if data[:@record_count].to_i > 0
         sites = data[:premises].map do |p|
-          puts p[:uprn]
           Site.new(p)
           # puts data
         end
       end
       sites
-      # puts data
-      # Place.new(data[:premises])
     end
 
     def self.find(uprn_val)

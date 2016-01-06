@@ -1,17 +1,14 @@
 module Collective::Api
   class Base
+    PARAMS_MAP = {
+        'postcode': 'Postcode',
+        'uprn': 'UPRN',
+        'usrn': 'USRN',
+      }
+
     def initialize(json)
       @json = json
-      # puts json
     end
-    
-    # def method_missing(m, *args, &block)  
-    #   puts 'method_missing'
-    #   session = Collective::Session.instance
-    #   args = {} if args.size == 0
-    #   args = args[0] if args.size == 1
-    #   session.call(:"#{m}", args)
-    # end  
 
     def self.map_method(name, from_name = nil)
       # puts 'map_method'
@@ -27,6 +24,17 @@ module Collective::Api
     def extract_data(data, property)
       if data[:@record_count].to_i > 0
         data[property]
+      end
+    end
+
+    # Adjusts HTTP parameters from lowercase REST API format to whatever 
+    # Collective requires.
+    def self.process_params(params)
+      PARAMS_MAP.each_pair do |key, value|
+        if params[key]
+          params[value] = params[key]
+          params.delete(key)
+        end
       end
     end
   end
