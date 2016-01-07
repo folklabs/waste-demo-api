@@ -41,7 +41,7 @@ helpers do
   def filter_tasks(tasks, service, start_date, end_date)
     matched_tasks = tasks.select do |task|
       is_valid = false
-      task_start_time = task.scheduled_time
+      task_start_time = task.scheduled_start_date
       if task_start_time >= start_date and task_start_time <= end_date
         service.feature_types.each do |ct|
           is_valid = true if task.name.downcase.include?(ct.name.downcase)

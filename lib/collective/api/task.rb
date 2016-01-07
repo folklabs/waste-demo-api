@@ -14,6 +14,7 @@ module Collective::Api
 
     # Older mappings preserved for now
     map_method 'start_time', 'actual_start'
+    map_method 'scheduled_time', 'scheduled_start'
 
 
     def self.all(args = {})
