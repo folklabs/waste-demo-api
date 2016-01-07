@@ -17,6 +17,12 @@ require 'ostruct'
 require "yaml"
 require "hashie"
 require 'collective/api'
+require "better_errors"
+
+configure :development do
+  use BetterErrors::Middleware
+  BetterErrors.application_root = __dir__
+end
 
 
 # 4 week time period
@@ -105,6 +111,20 @@ get '/services/:id' do
 end
 
 
+get '/event_types' do
+  @event_types = Collective::Api::EventType.all(params)
+
+  jbuilder :'event_types/index'
+end
+
+
+get '/event_types/:id' do
+  @event_type = Collective::Api::EventType.find(params[:id])
+
+  jbuilder :'event_types/show'
+end
+
+
 get '/events' do
   @events = Collective::Api::WasteEvent.all(params)
 
@@ -117,6 +137,35 @@ get '/events/:id' do
 
   jbuilder :'events/show'
 end
+
+
+get '/feature_types' do
+  @feature_types = Collective::Api::FeatureType.all(params)
+
+  jbuilder :'feature_types/index'
+end
+
+
+get '/feature_types/:id' do
+  @feature_type = Collective::Api::FeatureType.find(params[:id])
+
+  jbuilder :'feature_types/show'
+end
+
+
+get '/features' do
+  @features = Collective::Api::Feature.all(params)
+
+  jbuilder :'features/index'
+end
+
+
+get '/features/:id' do
+  @feature = Collective::Api::Feature.find(params[:id])
+
+  jbuilder :'features/show'
+end
+
 
 get '/sites' do
   @sites = Collective::Api::Site.all(params)

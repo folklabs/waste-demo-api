@@ -2,59 +2,25 @@ module Collective::Api
   class WasteEvent < Base
 
     map_method 'id'
-    # map_method 'description'
-    # map_method 'scheduled_end_time', 'scheduled_finish'
+    map_method 'start_date', 'event_date'
 
     def self.all(args = {})
+      Base.process_params(args)
 
-      # if args[:postcode]
-      #   args[:Postcode] = args[:postcode]
-      #   args.delete(:postcode)
-      # end
-      # puts args
-      # todo: Move into helper method
-      if args['uprn']
-        args['UPRN'] = args['uprn']
-        args.delete('uprn')
-      end
-      if args['date_range']
-        # puts 'parsing date range'
-        dates = args['date_range'].split(',')
-        args.delete('date_range')
-        args[:DateRange] = {MinimumDate: dates[0], MaximumDate: dates[1]}
-      end
-      data = Collective::Base.premises_events_get(args)
-      # puts data.count
-      puts JSON.pretty_generate(data)
-      # puts data
-      #TODO: nil items
       events = []
-      if data[:@record_count].to_i == 1
-        # Single object is given if just one, otherwise its a list
-        events = [Collective::Api::WasteEvent.new(data[:event])]
-      elsif data[:@record_count].to_i > 1
-        events = data[:event].map do |p|
-          # puts p[:uprn]
-          Collective::Api::WasteEvent.new(p)
-          # puts p
-        end
-      end
-      # puts data
-      # Place.new(data[:premises])
+      data = Collective::Base.premises_events_get(args)
+      events = create_api_objects(data, Collective::Api::WasteEvent)
+
+      data = Collective::Base.streets_events_get(args)
+      events += create_api_objects(data, Collective::Api::WasteEvent)
     end
 
     # TODO: fix when its possible to query for an event by ID. Need to assess if
     # this is worth having.
     def self.find(id)
-      # data = Collective::Event.jobs_detail_get({JobID: id})
-      # # puts data
-      # puts JSON.pretty_generate(data)
-      # # # TODO: data available?
-      # Task.new(data[:job])
-    end
-
-    def start_date
-      @json[:event_date]
+      events = self.all
+      matched = events.select {|t| t.id == id }
+      matched[0] if matched.size > 0
     end
 
     def event_type
@@ -68,6 +34,7 @@ module Collective::Api
     def location
       Site.new({uprn: @json[:uprn], location: @json[:event_location]})
     end
+
   end
 end
 

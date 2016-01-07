@@ -7,22 +7,50 @@ services:
     feature_types:
       - name: Black 240L
         description:
+    description: |
+      Anything that can't be recycled.
+
   - id: 2
     name: Recycling
     esd_url: http://id.esd.org.uk/service/1130
     feature_types:
       - name: Green 240L
         description:
+    description: |
+      # What goes in
+      
+      * paper
+      * cardboard
+      * plastic bottles
+      * drink cartons
+      * drink cans
+      * aluminium foil
+      * empty aerosols
+      * textiles - please put in clear sacks
+      * small eletrical items, such as kettles, irons etc (no batteries)
+
   - id: 3
     name: Garden waste
     esd_url: http://id.esd.org.uk/service/530
     feature_types:
       - name: Brown 240L
         description:
+    description: |
+      Garden waste, such as:
+
+      grass cuttings
+      hedge clippings
+      plants
+      leaves
+      branches up to 4 inches thick
+      other untreated wood
+
   - id: 4
     name: Glass collection
     esd_url: http://id.esd.org.uk/service/1130
     feature_types:
       - name: Black Box 55L
         description:
+    description: |
+      Glass bottles and jars only
 

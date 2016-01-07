@@ -1,7 +1,7 @@
 json.set! '@id', "#{request.base_url}/tasks/#{task.id}"
 # TODO: handle different task types
 json.set! '@type', 'EmptyBinTask'
-json.(task, :name, :scheduled_time, :start_time)
+json.(task, :name, :scheduled_start_date, :start_date, :end_date)
 json.location do
   json.set! 'uprn', task.location.uprn
 end

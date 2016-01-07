@@ -1,5 +1,6 @@
 module Collective::Api
   class Site < Base
+    
     def self.all(args = {})
       Base.process_params(args)
       data = Collective::Premise.premises_get(args)
@@ -7,7 +8,6 @@ module Collective::Api
       if data[:@record_count].to_i > 0
         sites = data[:premises].map do |p|
           Site.new(p)
-          # puts data
         end
       end
       sites

@@ -1,5 +1,6 @@
 module Collective::Api
   class Address < Base
+
     def paon
       @json[:address2]
     end
@@ -36,6 +37,7 @@ module Collective::Api
     def description
       to_s
     end
+
   end
 end
 
