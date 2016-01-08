@@ -8,10 +8,11 @@ module Collective::Api
       Base.process_params(args)
       
       data = Collective::Base.premises_events_types_get(args)
-      event_types += create_api_objects(data, Collective::Api::EventType)
+      data = data[:sub_event_types]
+      event_types = create_api_objects(data, Collective::Api::EventType, :sub_event_type)
 
-      data += Collective::Base.streets_events_types_get(args)
-      event_types += create_api_objects(data, Collective::Api::EventType)
+      # data += Collective::Base.streets_events_types_get(args)
+      # event_types += create_api_objects(data, Collective::Api::EventType, :event_type)
     end
 
     # TODO: fix when its possible to query for an event by ID. Need to assess if
