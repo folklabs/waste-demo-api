@@ -111,14 +111,14 @@ get '/services/:id' do
 end
 
 
-get '/event_types' do
+get '/event-types' do
   @event_types = Collective::Api::EventType.all(params)
 
   jbuilder :'event_types/index'
 end
 
 
-get '/event_types/:id' do
+get '/event-types/:id' do
   @event_type = Collective::Api::EventType.find(params[:id])
 
   jbuilder :'event_types/show'
@@ -139,14 +139,14 @@ get '/events/:id' do
 end
 
 
-get '/feature_types' do
+get '/feature-types' do
   @feature_types = Collective::Api::FeatureType.all(params)
 
   jbuilder :'feature_types/index'
 end
 
 
-get '/feature_types/:id' do
+get '/feature-types/:id' do
   @feature_type = Collective::Api::FeatureType.find(params[:id])
 
   jbuilder :'feature_types/show'
