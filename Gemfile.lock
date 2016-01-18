@@ -1,3 +1,10 @@
+PATH
+  remote: ~/dev/hydra
+  specs:
+    oat (0.4.6)
+      activesupport
+    oat_hydra (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -71,6 +78,8 @@ PLATFORMS
 DEPENDENCIES
   dotenv
   hashie
+  oat
+  oat_hydra!
   rack-cors
   savon (~> 2.0)
   sinatra
@@ -78,4 +87,4 @@ DEPENDENCIES
   tilt-jbuilder (>= 0.4.0)
 
 BUNDLED WITH
-   1.10.6
+   1.11.2

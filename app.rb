@@ -11,13 +11,23 @@ Dotenv.load
 require 'json'
 require 'sinatra'
 require 'sinatra/config_file'
+require "sinatra/json"
 require 'tilt/jbuilder'
 require 'sinatra/jbuilder'
 require 'ostruct'
 require "yaml"
 require "hashie"
 require 'collective/api'
+require 'serializers/collection'
+require 'serializers/waste_service_collection'
+require 'serializers/waste_service'
+require 'serializers/task'
 
+require 'oat/adapters/hal'
+require 'oat/adapters/json_api'
+require 'oat/adapters/siren'
+
+require 'oat_hydra/adapters/hydra'
 
 # 4 week time period
 DEFAULT_TIME_PERIOD = 60*60*24*28
@@ -28,6 +38,10 @@ future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
 config_file 'config.yml'
 
 helpers do
+  def base_url
+    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
+  end
+
   def collections_in_date_range(uprn, start_date, end_date)
     tasks = Collective::Api::Task.all({'UPRN'=> uprn, 'schedule_start'=> "#{start_date},#{end_date}", 'Jobs_Bounds' =>'', 'show_events' => 'true'})
   end
@@ -91,7 +105,7 @@ get '/services' do
   end
   @services = settings.services.map { |s| Hashie::Mash.new(s) }
 
-  jbuilder :'services/index'
+  json WasteServiceCollectionSerializer.new(@services, {request: request}, Oat::Adapters::Hydra).to_hash
 end
 
 
@@ -101,7 +115,9 @@ get '/services/:id' do
   end
   @service = Hashie::Mash.new(settings.services[params['id'].to_i])
 
-  jbuilder :'services/show'
+  # jbuilder :'services/show'
+
+  json WasteServiceSerializer.new(@service, {request: request}, Oat::Adapters::Hydra).to_hash
 end
 
 
@@ -135,14 +151,16 @@ end
 get '/tasks' do
   @tasks = Collective::Api::Task.all(params)
 
-  jbuilder :'tasks/index'
+  json CollectionSerializer.new(@tasks).to_hash
 end
 
 
 get '/tasks/:id' do
   @task = Collective::Api::Task.find(params[:id])
-
-  jbuilder :'tasks/show'
+  content_type :json
+  # jbuilder :'tasks/show'
+  json TaskSerializer.new(@task).to_hash
+  # TaskSerializer.new(@task).to_hash.to_json
 end
 
 

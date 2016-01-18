@@ -10,3 +10,6 @@ gem "hashie"
 gem 'dotenv'
 gem 'savon', '~> 2.0'
 gem 'rack-cors', :require => 'rack/cors'
+
+gem 'oat'
+gem 'oat_hydra', :path => '~/dev/hydra'
