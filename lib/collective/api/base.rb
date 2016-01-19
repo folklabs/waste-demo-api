@@ -11,12 +11,8 @@ module Collective::Api
     end
 
     def self.map_method(name, from_name = nil)
-      # puts 'map_method'
       from_name = name if from_name == nil
       define_method(name) do
-        # puts name
-        # puts JSON.pretty_generate(@json)
-        # puts @json
         @json[:"#{from_name}"]
       end
     end
@@ -35,6 +31,24 @@ module Collective::Api
           params[value] = params[key]
           params.delete(key)
         end
+      end
+      if params['date_range']
+        dates = params['date_range'].split(',')
+        params.delete('date_range')
+        params[:DateRange] = {MinimumDate: dates[0], MaximumDate: dates[1]}
+      end
+    end
+
+    def self.create_api_objects(data, clazz, json_type)
+      if data[:@record_count].to_i == 1
+        # Single object is given if just one, otherwise its a list
+        events = [clazz.new(data[json_type])]
+      elsif data[:@record_count].to_i > 1
+        events = data[json_type].map do |p|
+          clazz.new(p)
+        end
+      else
+        events = []
       end
     end
   end

@@ -1,7 +1,7 @@
 json.set! '@id', "#{request.base_url}/services/#{service['id']}"
 json.set! '@type', 'WasteService'
 json.set! 'name', service.name
-json.(service, 'name', 'esd_url')#, :frequency, :description)
+json.(service, 'name', 'esd_url', 'description')
 
 json.feature_types service.feature_types do |feature_type|
   # json.(feature_type, :name, :shape, :color, :lid_color, :description)

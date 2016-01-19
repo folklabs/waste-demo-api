@@ -30,6 +30,13 @@ require 'oat/adapters/siren'
 
 require 'oat_hydra/adapters/hydra'
 
+
+configure :development do
+  require "better_errors"
+  use BetterErrors::Middleware
+  BetterErrors.application_root = __dir__
+end
+
 # 4 week time period
 DEFAULT_TIME_PERIOD = 60*60*24*28
 past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s)
@@ -50,7 +57,7 @@ helpers do
   def filter_tasks(tasks, service, start_date, end_date)
     matched_tasks = tasks.select do |task|
       is_valid = false
-      task_start_time = task.scheduled_time
+      task_start_time = task.scheduled_start_date
       if task_start_time >= start_date and task_start_time <= end_date
         service.feature_types.each do |ct|
           is_valid = true if task.name.downcase.include?(ct.name.downcase)
@@ -130,6 +137,20 @@ get '/services/:id' do
 end
 
 
+get '/event-types' do
+  @event_types = Collective::Api::EventType.all(params)
+
+  jbuilder :'event_types/index'
+end
+
+
+get '/event-types/:id' do
+  @event_type = Collective::Api::EventType.find(params[:id])
+
+  jbuilder :'event_types/show'
+end
+
+
 get '/events' do
   @events = Collective::Api::WasteEvent.all(params)
 
@@ -142,6 +163,35 @@ get '/events/:id' do
 
   respond_with_item(WasteEventSerializer, @event)
 end
+
+
+get '/feature-types' do
+  @feature_types = Collective::Api::FeatureType.all(params)
+
+  jbuilder :'feature_types/index'
+end
+
+
+get '/feature-types/:id' do
+  @feature_type = Collective::Api::FeatureType.find(params[:id])
+
+  jbuilder :'feature_types/show'
+end
+
+
+get '/features' do
+  @features = Collective::Api::Feature.all(params)
+
+  jbuilder :'features/index'
+end
+
+
+get '/features/:id' do
+  @feature = Collective::Api::Feature.find(params[:id])
+
+  jbuilder :'features/show'
+end
+
 
 get '/sites' do
   @sites = Collective::Api::Site.all(params)
