@@ -1,18 +1,13 @@
-require 'oat/adapters/hal'
 class TaskSerializer < Oat::Serializer
-  adapter Oat::Adapters::HAL
 
   schema do
-    type "Task"
-    # link :self, href: product_url(item)
+    link :self, href: "#{context[:request].base_url}/tasks/#{item.id}"
+    #TODO: in future this would need to change depending on task type
+    type "EmptyBinTask"
 
-    properties do |props|
-      props.id item.id
-      # props.price item.price
-      # props.description item.blurb
-    end
+    map_properties :id
 
-    if params.has_key?('show_events')
+    if context[:request]['show_events'] != nil
       entities :events, item.events do |event, s|
         s.name event.name
         s.id event.id

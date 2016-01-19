@@ -19,7 +19,8 @@ require "yaml"
 require "hashie"
 require 'collective/api'
 require 'serializers/collection'
-require 'serializers/waste_service_collection'
+require 'serializers/site'
+require 'serializers/waste_event'
 require 'serializers/waste_service'
 require 'serializers/task'
 
@@ -77,6 +78,16 @@ helpers do
     future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
     tasks = filter_tasks(tasks, service, DateTime.now, future_date)
   end
+
+  def respond_with_collection(items, opts)
+    opts[:request] = request
+    json CollectionSerializer.new(items, opts, Oat::Adapters::Hydra).to_hash
+  end
+
+  def respond_with_item(serializer_class, item, opts = {})
+    opts[:request] = request
+    json serializer_class.new(item, opts, Oat::Adapters::Hydra).to_hash
+  end
 end
 
 
@@ -105,7 +116,7 @@ get '/services' do
   end
   @services = settings.services.map { |s| Hashie::Mash.new(s) }
 
-  json WasteServiceCollectionSerializer.new(@services, {request: request}, Oat::Adapters::Hydra).to_hash
+  respond_with_collection(@services, { name: 'services', serializer: WasteServiceSerializer })
 end
 
 
@@ -115,52 +126,48 @@ get '/services/:id' do
   end
   @service = Hashie::Mash.new(settings.services[params['id'].to_i])
 
-  # jbuilder :'services/show'
-
-  json WasteServiceSerializer.new(@service, {request: request}, Oat::Adapters::Hydra).to_hash
+  respond_with_item(WasteServiceSerializer, @service)
 end
 
 
 get '/events' do
   @events = Collective::Api::WasteEvent.all(params)
 
-  jbuilder :'events/index'
+  respond_with_collection(@events, { name: 'events', serializer: WasteEventSerializer })
 end
 
 
 get '/events/:id' do
   @event = Collective::Api::WasteEvent.find(params[:id])
 
-  jbuilder :'events/show'
+  respond_with_item(WasteEventSerializer, @event)
 end
 
 get '/sites' do
   @sites = Collective::Api::Site.all(params)
-  
-  jbuilder :'sites/index'
+
+  respond_with_collection(@sites, { name: 'sites', serializer: SiteSerializer })
 end
 
 
 get '/sites/:id' do
   @site = Collective::Api::Site.find(params[:id])
 
-  jbuilder :'sites/show'
+  respond_with_item(SiteSerializer, @site)
 end
 
 
 get '/tasks' do
   @tasks = Collective::Api::Task.all(params)
 
-  json CollectionSerializer.new(@tasks).to_hash
+  respond_with_collection(@tasks, { name: 'tasks', serializer: TaskSerializer } )
 end
 
 
 get '/tasks/:id' do
   @task = Collective::Api::Task.find(params[:id])
-  content_type :json
-  # jbuilder :'tasks/show'
-  json TaskSerializer.new(@task).to_hash
-  # TaskSerializer.new(@task).to_hash.to_json
+
+  respond_with_item(TaskSerializer, @task)
 end
 
 

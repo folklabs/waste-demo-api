@@ -1,7 +1,4 @@
-# require 'oat/adapters/hal'
-# require 'oat/adapters/siren'
 class WasteServiceSerializer < Oat::Serializer
-  # adapter Oat::Adapters::HAL
 
   schema do
     type "WasteService"

@@ -1,15 +1,10 @@
-require 'oat/adapters/hal'
 class CollectionSerializer < Oat::Serializer
-  adapter Oat::Adapters::HAL
 
   schema do
+    link :self, href: "#{context[:request].base_url}/#{context[:name]}"
     type "Collection"
-    collection :tasks, item, TaskSerializer
-    # properties do |props|
-    #   props.id item.id
-    #   # props.price item.price
-    #   # props.description item.blurb
-    # end
+    
+    collection context[:name], item, context[:serializer]
   end
 
 end
