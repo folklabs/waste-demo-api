@@ -13,3 +13,6 @@ gem 'rack-cors', :require => 'rack/cors'
 
 gem 'oat'
 gem 'oat_hydra', :path => '~/dev/hydra'
+
+gem 'better_errors'
+gem 'binding_of_caller'
