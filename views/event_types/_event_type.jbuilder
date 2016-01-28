@@ -1,5 +1,5 @@
 json.set! '@id', "#{request.base_url}/event-types/#{event_type.id}"
-json.set! '@type', 'EventType'
+json.set! '@type', event_type.type
 json.(event_type, :id, :name)
 if event_type.parent
   json.parent do

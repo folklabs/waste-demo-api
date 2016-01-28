@@ -22,6 +22,7 @@ module Collective::Api
       if args['schedule_start']
         dates = args['schedule_start'].split(',')
         args.delete('schedule_start')
+        # The Collective docs show this as "ScheduledStart"
         args[:ScheduleStart] = {MinimumDate: dates[0], MaximumDate: dates[1]}
       end
       data = Collective::Job.jobs_get(args)
@@ -43,19 +44,6 @@ module Collective::Api
     def status
       @json[:status][:status].downcase if @json[:status]
     end
-
-    # def start_date
-    #   # puts @json[:actual_start]
-    #   @json[:actual_start]
-    # end
-
-    # def end_date
-    #   @json[:actual_end]
-    # end
-
-    # def scheduled_start_date
-    #   @json[:scheduled_start]
-    # end
 
     def location
       Site.new(@json[:premises])

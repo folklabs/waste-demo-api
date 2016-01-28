@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'bundler'
 
+ENV['RACK_ENV'] ||= 'development'
+
 Bundler.require
 $: << File.expand_path('../', __FILE__)
 $: << File.expand_path('../lib', __FILE__)

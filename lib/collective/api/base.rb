@@ -1,13 +1,17 @@
 module Collective::Api
   class Base
     PARAMS_MAP = {
-        'postcode': 'Postcode',
-        'uprn': 'UPRN',
-        'usrn': 'USRN',
+        'postcode': :'Postcode',
+        'uprn': :'UPRN',
+        'usrn': :'USRN',
+        'include_related': :'IncludeRelated',
       }
+    
+    attr_accessor :type
 
     def initialize(json)
       @json = json
+      @type = self.class.name
     end
 
     def self.map_method(name, from_name = nil)
@@ -27,7 +31,7 @@ module Collective::Api
     # Collective requires.
     def self.process_params(params)
       PARAMS_MAP.each_pair do |key, value|
-        if params[key]
+        if params[key] or params[key.to_sym]
           params[value] = params[key]
           params.delete(key)
         end
@@ -35,20 +39,22 @@ module Collective::Api
       if params['date_range']
         dates = params['date_range'].split(',')
         params.delete('date_range')
-        params[:DateRange] = {MinimumDate: dates[0], MaximumDate: dates[1]}
+        params[:DateRange] = { MinimumDate: dates[0], MaximumDate: dates[1] }
       end
     end
 
-    def self.create_api_objects(data, clazz, json_type)
+    def self.create_api_objects(data, clazz, json_key)
       if data[:@record_count].to_i == 1
         # Single object is given if just one, otherwise its a list
-        events = [clazz.new(data[json_type])]
+        items = [clazz.new(data[json_key])]
       elsif data[:@record_count].to_i > 1
-        events = data[json_type].map do |p|
+        data = data[json_key]
+        data = data.values[0] if data.class == Hash
+        items = data.map do |p|
           clazz.new(p)
         end
       else
-        events = []
+        items = []
       end
     end
   end
