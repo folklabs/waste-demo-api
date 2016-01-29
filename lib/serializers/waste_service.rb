@@ -7,6 +7,7 @@ class WasteServiceSerializer < Oat::Serializer
     map_properties :id, :name, :esd_url
 
     entities :feature_types, item.feature_types do |feature_type, serializer|
+      serializer.type "FeatureType"
       serializer.properties do |props|
         props.name feature_type.name
         props.description feature_type.description

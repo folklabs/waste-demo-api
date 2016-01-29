@@ -88,12 +88,31 @@ helpers do
 
   def respond_with_collection(items, opts)
     opts[:request] = request
-    json CollectionSerializer.new(items, opts, Oat::Adapters::Hydra).to_hash
+    adapter = select_adapter
+    json CollectionSerializer.new(items, opts, adapter).to_hash
   end
 
   def respond_with_item(serializer_class, item, opts = {})
     opts[:request] = request
-    json serializer_class.new(item, opts, Oat::Adapters::Hydra).to_hash
+    adapter = select_adapter
+    json serializer_class.new(item, opts, adapter).to_hash
+  end
+
+  def select_adapter()
+    adapter = Oat::Adapters::Hydra
+    request.accept.each do |type|
+      case type.to_s
+      when 'application/json-ld'
+        # This is default
+      when 'application/vnd.api+json'
+        adapter = Oat::Adapters::JsonAPI
+      when 'application/vnd.siren+json'
+        adapter = Oat::Adapters::Siren
+      when 'application/hal+json'
+        adapter = Oat::Adapters::HAL
+      end
+    end
+    adapter
   end
 end
 
