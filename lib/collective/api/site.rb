@@ -27,6 +27,10 @@ module Collective::Api
       @json[:usrn].to_i
     end
 
+    def parent_uprn
+      @json[:parent_uprn].to_i if @json[:parent_uprn]
+    end
+
     def latitude
       @json[:location][:metric][:@latitude]
     end
@@ -36,7 +40,7 @@ module Collective::Api
     end
 
     def address
-      Address.new(@json[:address]) if @json[:address] != nil
+      Address.new(@json[:address]) if @json[:address]
     end
 
     def attributes
