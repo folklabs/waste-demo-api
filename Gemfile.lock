@@ -1,8 +1,7 @@
-PATH
-  remote: ~/dev/hydra
+GIT
+  remote: https://github.com/pmackay/oat_hydra.git
+  revision: a013d42ba2bb2f8e7fc8d1b3bc0ccc8fa2a48553
   specs:
-    oat (0.4.6)
-      activesupport
     oat_hydra (0.1.0)
 
 GEM
@@ -45,6 +44,8 @@ GEM
     nokogiri (1.6.7)
       mini_portile2 (~> 2.0.0.rc2)
     nori (2.6.0)
+    oat (0.4.6)
+      activesupport
     rack (1.6.4)
     rack-cors (0.4.0)
     rack-protection (1.5.3)
