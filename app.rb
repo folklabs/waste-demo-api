@@ -21,6 +21,9 @@ require "yaml"
 require "hashie"
 require 'collective/api'
 require 'serializers/collection'
+require 'serializers/event_type'
+require 'serializers/feature'
+require 'serializers/feature_type'
 require 'serializers/site'
 require 'serializers/waste_event'
 require 'serializers/waste_service'
@@ -161,14 +164,14 @@ end
 get '/event-types' do
   @event_types = Collective::Api::EventType.all(params)
 
-  jbuilder :'event_types/index'
+  respond_with_collection(@event_types, { name: 'event-types', serializer: EventTypeSerializer })
 end
 
 
 get '/event-types/:id' do
   @event_type = Collective::Api::EventType.find(params[:id])
 
-  jbuilder :'event_types/show'
+  respond_with_item(EventTypeSerializer, @event_type)
 end
 
 
@@ -187,30 +190,30 @@ end
 
 
 get '/feature-types' do
-  @feature_types = Collective::Api::FeatureType.all(params)
+  @collection = Collective::Api::FeatureType.all(params)
 
-  jbuilder :'feature_types/index'
+  respond_with_collection(@collection, { name: 'feature-types', serializer: FeatureTypeSerializer })
 end
 
 
 get '/feature-types/:id' do
   @feature_type = Collective::Api::FeatureType.find(params[:id])
 
-  jbuilder :'feature_types/show'
+  respond_with_item(FeatureTypeSerializer, @feature_type)
 end
 
 
 get '/features' do
-  @features = Collective::Api::Feature.all(params)
+  @collection = Collective::Api::Feature.all(params)
 
-  jbuilder :'features/index'
+  respond_with_collection(@collection, { name: 'feature', serializer: FeatureSerializer })
 end
 
 
 get '/features/:id' do
   @feature = Collective::Api::Feature.find(params[:id])
 
-  jbuilder :'features/show'
+  respond_with_item(FeatureSerializer, @feature)
 end
 
 
