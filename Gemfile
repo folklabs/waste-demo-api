@@ -11,6 +11,9 @@ gem 'dotenv'
 gem 'savon', '~> 2.0'
 gem 'rack-cors', :require => 'rack/cors'
 
+gem 'oat'
+gem 'oat_hydra', :git => 'https://github.com/pmackay/oat_hydra.git'
+
 group :development do
   gem "better_errors"
   gem "binding_of_caller"

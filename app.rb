@@ -13,19 +13,31 @@ Dotenv.load
 require 'json'
 require 'sinatra'
 require 'sinatra/config_file'
+require "sinatra/json"
 require 'tilt/jbuilder'
 require 'sinatra/jbuilder'
 require 'ostruct'
 require "yaml"
 require "hashie"
 require 'collective/api'
+require 'serializers/collection'
+require 'serializers/site'
+require 'serializers/waste_event'
+require 'serializers/waste_service'
+require 'serializers/task'
+
+require 'oat/adapters/hal'
+require 'oat/adapters/json_api'
+require 'oat/adapters/siren'
+
+require 'oat_hydra/adapters/hydra'
+
 
 configure :development do
   require "better_errors"
   use BetterErrors::Middleware
   BetterErrors.application_root = __dir__
 end
-
 
 # 4 week time period
 DEFAULT_TIME_PERIOD = 60*60*24*28
@@ -36,6 +48,10 @@ future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
 config_file 'config.yml'
 
 helpers do
+  def base_url
+    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
+  end
+
   def collections_in_date_range(uprn, start_date, end_date)
     tasks = Collective::Api::Task.all({'UPRN'=> uprn, 'schedule_start'=> "#{start_date},#{end_date}", 'Jobs_Bounds' =>'', 'show_events' => 'true'})
   end
@@ -71,6 +87,35 @@ helpers do
     future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
     tasks = filter_tasks(tasks, service, DateTime.now, future_date)
   end
+
+  def respond_with_collection(items, opts)
+    opts[:request] = request
+    adapter = select_adapter
+    json CollectionSerializer.new(items, opts, adapter).to_hash
+  end
+
+  def respond_with_item(serializer_class, item, opts = {})
+    opts[:request] = request
+    adapter = select_adapter
+    json serializer_class.new(item, opts, adapter).to_hash
+  end
+
+  def select_adapter()
+    adapter = Oat::Adapters::Hydra
+    request.accept.each do |type|
+      case type.to_s
+      when 'application/json-ld'
+        # This is default
+      when 'application/vnd.api+json'
+        adapter = Oat::Adapters::JsonAPI
+      when 'application/vnd.siren+json'
+        adapter = Oat::Adapters::Siren
+      when 'application/hal+json'
+        adapter = Oat::Adapters::HAL
+      end
+    end
+    adapter
+  end
 end
 
 
@@ -99,7 +144,7 @@ get '/services' do
   end
   @services = settings.services.map { |s| Hashie::Mash.new(s) }
 
-  jbuilder :'services/index'
+  respond_with_collection(@services, { name: 'services', serializer: WasteServiceSerializer })
 end
 
 
@@ -109,7 +154,7 @@ get '/services/:id' do
   end
   @service = Hashie::Mash.new(settings.services[params['id'].to_i])
 
-  jbuilder :'services/show'
+  respond_with_item(WasteServiceSerializer, @service)
 end
 
 
@@ -130,14 +175,14 @@ end
 get '/events' do
   @events = Collective::Api::WasteEvent.all(params)
 
-  jbuilder :'events/index'
+  respond_with_collection(@events, { name: 'events', serializer: WasteEventSerializer })
 end
 
 
 get '/events/:id' do
   @event = Collective::Api::WasteEvent.find(params[:id])
 
-  jbuilder :'events/show'
+  respond_with_item(WasteEventSerializer, @event)
 end
 
 
@@ -171,29 +216,29 @@ end
 
 get '/sites' do
   @sites = Collective::Api::Site.all(params)
-  
-  jbuilder :'sites/index'
+
+  respond_with_collection(@sites, { name: 'sites', serializer: SiteSerializer })
 end
 
 
 get '/sites/:id' do
   @site = Collective::Api::Site.find(params[:id])
 
-  jbuilder :'sites/show'
+  respond_with_item(SiteSerializer, @site)
 end
 
 
 get '/tasks' do
   @tasks = Collective::Api::Task.all(params)
 
-  jbuilder :'tasks/index'
+  respond_with_collection(@tasks, { name: 'tasks', serializer: TaskSerializer } )
 end
 
 
 get '/tasks/:id' do
   @task = Collective::Api::Task.find(params[:id])
 
-  jbuilder :'tasks/show'
+  respond_with_item(TaskSerializer, @task)
 end
 
 
