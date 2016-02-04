@@ -19,7 +19,8 @@ require 'sinatra/jbuilder'
 require 'ostruct'
 require "yaml"
 require "hashie"
-require 'collective/api'
+require 'active_support/inflector'
+
 require 'serializers/collection'
 require 'serializers/event_type'
 require 'serializers/feature'
@@ -34,6 +35,10 @@ require 'oat/adapters/json_api'
 require 'oat/adapters/siren'
 
 require 'oat_hydra/adapters/hydra'
+
+require 'waste_system'
+require 'collective'
+require 'powersuite'
 
 
 configure :development do
@@ -103,7 +108,7 @@ helpers do
     json serializer_class.new(item, opts, adapter).to_hash
   end
 
-  def select_adapter()
+  def select_adapter
     adapter = Oat::Adapters::Hydra
     request.accept.each do |type|
       case type.to_s
@@ -118,6 +123,15 @@ helpers do
       end
     end
     adapter
+  end
+
+  def session
+    case ENV['SYSTEM']
+    when 'collective'
+      Collective::Session.new
+    when 'powersuite'
+      Powersuite::Session.new
+    end
   end
 end
 
@@ -145,7 +159,7 @@ get '/services' do
   if params['uprn']
     @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
   end
-  @services = settings.services.map { |s| Hashie::Mash.new(s) }
+  @services = session.services(settings, params)
 
   respond_with_collection(@services, { name: 'services', serializer: WasteServiceSerializer })
 end
@@ -218,14 +232,16 @@ end
 
 
 get '/sites' do
-  @sites = Collective::Api::Site.all(params)
+  site_class = session.resource_class(request.path_info)
+  @sites = site_class.all(params)
 
   respond_with_collection(@sites, { name: 'sites', serializer: SiteSerializer })
 end
 
 
 get '/sites/:id' do
-  @site = Collective::Api::Site.find(params[:id])
+  site_class = session.resource_class(request.path_info)
+  @site = site_class.find(params[:id])
 
   respond_with_item(SiteSerializer, @site)
 end
