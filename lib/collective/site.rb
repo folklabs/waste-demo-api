@@ -1,9 +1,9 @@
-module Collective::Api
+module Collective
   class Site < Base
     
     def self.all(args = {})
       Base.process_params(args)
-      data = Collective::Premise.premises_get(args)
+      data = self.premises_get(args)
       sites = []
       if data[:@record_count].to_i > 0
         sites = data[:premises].map do |p|
@@ -14,7 +14,7 @@ module Collective::Api
     end
 
     def self.find(uprn_val)
-      data = Collective::Premise.premises_get({UPRN: uprn_val})
+      data = self.premises_get({UPRN: uprn_val})
       # TODO: data available?
       Site.new(data[:premises])
     end
@@ -40,12 +40,12 @@ module Collective::Api
     end
 
     def address
-      Address.new(@json[:address]) if @json[:address]
+      Collective::Address.new(@json[:address]) if @json[:address]
     end
 
     def attributes
       if @attributes == nil
-        data = Collective::Premise.premises_attributes_get(uprn)
+        data = self.premises_attributes_get(uprn)
         data = extract_data(data, :attributes)
       end
     end

@@ -1,14 +1,17 @@
 require "savon"
 
+require "waste_system"
+
 module Collective
-  class Session
+  class Session < WasteSystem::Session
 
     def initialize
+      super(ENV['COLLECTIVE_URL'])
       @auth_token = get_token
-      # @client = Savon.client(wsdl: ENV['COLLECTIVE_URL'], log:true, log_level: :debug, pretty_print_xml: true) do
-      @client = Savon.client(wsdl: ENV['COLLECTIVE_URL']) do
-        convert_request_keys_to :none
-      end
+      # # @client = Savon.client(wsdl: ENV['COLLECTIVE_URL'], log:true, log_level: :debug, pretty_print_xml: true) do
+      # @client = Savon.client(wsdl: ENV['COLLECTIVE_URL']) do
+      #   convert_request_keys_to :none
+      # end
     end
 
     def get_token
@@ -19,7 +22,7 @@ module Collective
     end
 
     def call(method, message = {})
-      # Insert auth token into body
+      # Insert auth token into request message
       message[:token] = @auth_token
       response = @client.call(method, message: message)
       
@@ -27,5 +30,8 @@ module Collective
       # puts response_data
       result = response_data[:"#{method}_result"]
     end
+
+    # def resource_class(path_info)
+    #   result = super.resource_class(path_info)
   end
 end

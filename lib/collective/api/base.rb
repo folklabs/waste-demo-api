@@ -1,4 +1,4 @@
-module Collective::Api
+module Collective
   class Base
     PARAMS_MAP = {
         'postcode': :'Postcode',

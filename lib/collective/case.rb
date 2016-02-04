@@ -1,5 +1,5 @@
-module Collective::Api
-  class FeatureType < Base
+module Collective
+  class Case < Base
 
     map_method 'id'
     map_method 'name'
@@ -8,8 +8,11 @@ module Collective::Api
     def self.all(args = {})
       Base.process_params(args)
       
-      data = Collective::Base.features_types_get(args)
-      features_types = create_api_objects(data, Collective::Api::FeatureType, :feature_type)
+      data = Collective::Base.service_requests_types_get(args)
+      puts data
+      data = Collective::Base.service_requests_get(args)
+      puts data
+      # objects = create_api_objects(data, Collective::FeatureType, :feature_type)
     end
 
     # TODO: improve when its possible to query a single item
@@ -19,9 +22,6 @@ module Collective::Api
       matched[0] if matched.size > 0
     end
 
-    def category_name
-      @json[:feature_class][:feature_category][:name]
-    end
   end
 end
 

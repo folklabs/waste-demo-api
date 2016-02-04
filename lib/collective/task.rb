@@ -1,4 +1,4 @@
-module Collective::Api
+module Collective
   class Task < Base
 
     attr_accessor :container_type
@@ -30,7 +30,7 @@ module Collective::Api
       tasks = []
       if data[:@record_count].to_i > 0
         tasks = data[:jobs].map do |p|
-          Collective::Api::Task.new(p[:job])
+          Collective::Task.new(p[:job])
         end
       end
       tasks
@@ -50,7 +50,7 @@ module Collective::Api
     end
 
     def events
-      data = Collective::Api::WasteEvent.all(UPRN: location.uprn, WorkPack: @json[:work_pack][:name])
+      data = Collective::WasteEvent.all(UPRN: location.uprn, WorkPack: @json[:work_pack][:name])
     end
   end
 end

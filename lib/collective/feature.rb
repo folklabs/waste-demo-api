@@ -1,4 +1,4 @@
-module Collective::Api
+module Collective
   class Feature < Base
 
     map_method 'id'
