@@ -7,9 +7,9 @@ module Powersuite
     def self.all(args = {})
       Base.process_params(args)
 
-      events = []
+      args[:_wrapper] = :roundIncidentInput
       data = self.get_site_incidents(args)
-      events = create_api_objects(data, Powersuite::Event, :event)
+      events = self.create_api_objects(data, Powersuite::Event, :event)
     end
 
     # TODO: fix when its possible to query for an event by ID. Need to assess if

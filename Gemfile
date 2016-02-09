@@ -21,6 +21,7 @@ end
 
 group :test, :development do
   gem 'rspec'
+  gem 'airborne'
 end
 
 group :test do

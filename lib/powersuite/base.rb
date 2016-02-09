@@ -5,6 +5,7 @@ module Powersuite
       'uprn': :'Uprn',
       'usrn': :'Usrn',
       'include_related': :'IncludeRelated',
+      'start_date': :'NextCollectionFromDate'
     }
 
     def initialize(json)
@@ -27,6 +28,7 @@ module Powersuite
         if params[key] or params[key.to_sym]
           params[value] = params[key]
           params.delete(key)
+          params.delete(key.to_s)
         end
       end
       if params['date_range']

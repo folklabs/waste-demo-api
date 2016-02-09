@@ -190,7 +190,8 @@ end
 
 
 get '/events' do
-  @events = Collective::Api::WasteEvent.all(params)
+  event_class = session.resource_class(request.path_info)
+  @events = event_class.all(params)
 
   respond_with_collection(@events, { name: 'events', serializer: WasteEventSerializer })
 end
@@ -248,7 +249,8 @@ end
 
 
 get '/tasks' do
-  @tasks = Collective::Api::Task.all(params)
+  task_class = session.resource_class(request.path_info)
+  @tasks = task_class.all(params)
 
   respond_with_collection(@tasks, { name: 'tasks', serializer: TaskSerializer } )
 end

@@ -5,7 +5,7 @@ class TaskSerializer < Oat::Serializer
     #TODO: in future this would need to change depending on task type
     type "EmptyBinTask"
 
-    map_properties :id
+    map_properties :id, :name, :start_date
 
     if context[:request]['show_events'] != nil
       entities :events, item.events do |event, s|

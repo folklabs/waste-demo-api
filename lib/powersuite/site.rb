@@ -16,7 +16,7 @@ module Powersuite
     end
 
     def self.find(uprn_val)
-      data = self.get_site_info({ Uprn: uprn_val, _wrapper: :siteInfoInput })
+      data = self.get_site_info(Uprn: uprn_val, _wrapper: :siteInfoInput)
       # TODO: data available?
       Site.new(data[:site])
     end
@@ -40,6 +40,10 @@ module Powersuite
 
     def address
       Address.new(@json[:address]) if @json[:address] != nil
+    end
+
+    def parent_uprn
+      @json[:site][:site_parent_id] if @json[:site]
     end
 
     def attributes
