@@ -1,9 +1,11 @@
 module Collective
   class Feature < Base
+    # extend WasteSystem::RelatedContent
 
     map_method 'id'
-    map_method 'name' #, 'name'
-    map_method 'description' #, 'description'
+    map_method 'name'
+    map_method 'description'
+    map_method 'uprn'
 
     def self.all(args = {})
       Base.process_params(args)
@@ -16,13 +18,13 @@ module Collective
       args[:'WasteTypes/'] = '' if args[:WasteTypes] == nil
       data = Collective::Base.features_get(args)
       features = create_api_objects(data, self, :feature)
-      # puts features_types
+      features += Feature.get_related_content(args, Feature)
     end
 
     # TODO: improve when its possible to query a single item
     def self.find(id)
-      features_types = self.all
-      matched = features_types.select {|t| t.id == id }
+      items = self.all
+      matched = items.select {|t| t.id == id }
       matched[0] if matched.size > 0
     end
 

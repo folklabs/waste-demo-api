@@ -12,7 +12,8 @@ module Collective
       events = create_api_objects(data, Collective::Event, :event)
 
       data = self.streets_events_get(args)
-      events += create_api_objects(data, Collective::Event, :event)
+      street_events = create_api_objects(data, Collective::Event, :event)
+      events += street_events
     end
 
     # TODO: fix when its possible to query for an event by ID. Need to assess if

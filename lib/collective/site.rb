@@ -14,7 +14,7 @@ module Collective
     end
 
     def self.find(uprn_val)
-      data = self.premises_get({UPRN: uprn_val})
+      data = self.premises_detail_get({UPRN: uprn_val})
       # TODO: data available?
       Site.new(data[:premises])
     end

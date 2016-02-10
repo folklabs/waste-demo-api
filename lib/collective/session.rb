@@ -31,7 +31,8 @@ module Collective
       result = response_data[:"#{method}_result"]
     end
 
-    # def resource_class(path_info)
-    #   result = super.resource_class(path_info)
+    def services(settings, params)
+      services = settings.collective['services'].map { |s| Hashie::Mash.new(s) }
+    end
   end
 end

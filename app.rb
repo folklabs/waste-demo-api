@@ -159,7 +159,7 @@ get '/services' do
   if params['uprn']
     @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
   end
-  @services = session.services(settings, params)
+  @services = WasteSystem::Session.get.services(settings, params)
 
   respond_with_collection(@services, { name: 'services', serializer: WasteServiceSerializer })
 end
@@ -170,95 +170,90 @@ get '/services/:id' do
     @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
   end
   @service = Hashie::Mash.new(settings.services[params['id'].to_i])
-
   respond_with_item(WasteServiceSerializer, @service)
 end
 
 
 get '/event-types' do
-  @event_types = Collective::Api::EventType.all(params)
-
+  clazz = WasteSystem::Session.get.resource_class(request.path_info)
+  @event_types = clazz.all(params)
   respond_with_collection(@event_types, { name: 'event-types', serializer: EventTypeSerializer })
 end
 
 
 get '/event-types/:id' do
-  @event_type = Collective::Api::EventType.find(params[:id])
-
+  clazz = WasteSystem::Session.get.resource_class(request.path_info)
+  @event_type = feature_class.find(params[:id])
   respond_with_item(EventTypeSerializer, @event_type)
 end
 
 
 get '/events' do
-  event_class = session.resource_class(request.path_info)
+  event_class = WasteSystem::Session.get.resource_class(request.path_info)
   @events = event_class.all(params)
-
   respond_with_collection(@events, { name: 'events', serializer: WasteEventSerializer })
 end
 
 
 get '/events/:id' do
-  @event = Collective::Api::WasteEvent.find(params[:id])
-
+  event_class = WasteSystem::Session.get.resource_class(request.path_info)
+  @event = event_class.find(params[:id])
   respond_with_item(WasteEventSerializer, @event)
 end
 
 
 get '/feature-types' do
-  @collection = Collective::Api::FeatureType.all(params)
-
+  clazz = WasteSystem::Session.get.resource_class(request.path_info)
+  @collection = clazz.all(params)
   respond_with_collection(@collection, { name: 'feature-types', serializer: FeatureTypeSerializer })
 end
 
 
 get '/feature-types/:id' do
-  @feature_type = Collective::Api::FeatureType.find(params[:id])
-
-  respond_with_item(FeatureTypeSerializer, @feature_type)
+  clazz = WasteSystem::Session.get.resource_class(request.path_info)
+  @item = clazz.find(params[:id])
+  respond_with_item(FeatureTypeSerializer, @item)
 end
 
 
 get '/features' do
-  @collection = Collective::Api::Feature.all(params)
-
-  respond_with_collection(@collection, { name: 'feature', serializer: FeatureSerializer })
+  feature_class = WasteSystem::Session.get.resource_class(request.path_info)
+  @collection = feature_class.all(params)
+  respond_with_collection(@collection, { name: 'features', serializer: FeatureSerializer })
 end
 
 
 get '/features/:id' do
-  @feature = Collective::Api::Feature.find(params[:id])
-
+  feature_class = WasteSystem::Session.get.resource_class(request.path_info)
+  @feature = feature_class.find(params[:id])
   respond_with_item(FeatureSerializer, @feature)
 end
 
 
 get '/sites' do
-  site_class = session.resource_class(request.path_info)
+  site_class = WasteSystem::Session.get.resource_class(request.path_info)
   @sites = site_class.all(params)
-
   respond_with_collection(@sites, { name: 'sites', serializer: SiteSerializer })
 end
 
 
 get '/sites/:id' do
-  site_class = session.resource_class(request.path_info)
+  site_class = WasteSystem::Session.get.resource_class(request.path_info)
   @site = site_class.find(params[:id])
-
   respond_with_item(SiteSerializer, @site)
 end
 
 
 get '/tasks' do
-  task_class = session.resource_class(request.path_info)
+  task_class = WasteSystem::Session.get.resource_class(request.path_info)
   @tasks = task_class.all(params)
-
   respond_with_collection(@tasks, { name: 'tasks', serializer: TaskSerializer } )
 end
 
 
 get '/tasks/:id' do
-  @task = Collective::Api::Task.find(params[:id])
-
+  task_class = WasteSystem::Session.get.resource_class(request.path_info)
+  @task = task_class.find(params[:id])
   respond_with_item(TaskSerializer, @task)
 end
 

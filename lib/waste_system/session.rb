@@ -6,6 +6,15 @@ require "savon"
 module WasteSystem
   class Session
 
+    def self.get
+      case ENV['SYSTEM']
+      when 'collective'
+        Collective::Session.new
+      when 'powersuite'
+        Powersuite::Session.new
+      end
+    end
+
     def initialize(wsdl_url)
       # @auth_token = get_token
       @client = Savon.client(wsdl: wsdl_url, log:true, log_level: :debug, pretty_print_xml: true) do

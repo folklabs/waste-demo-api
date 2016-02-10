@@ -7,6 +7,8 @@ class TaskSerializer < Oat::Serializer
 
     map_properties :id, :name, :start_date
 
+    property :site, "#{context[:request].base_url}/sites/#{item.location.uprn}"
+
     if context[:request]['show_events'] != nil
       entities :events, item.events do |event, s|
         s.name event.name

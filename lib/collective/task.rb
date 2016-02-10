@@ -7,10 +7,10 @@ module Collective
     map_method 'name'
     map_method 'status'
     
-    map_method 'start_date', 'actual_start'
-    map_method 'end_date', 'actual_end'
-    map_method 'scheduled_start_date', 'scheduled_start'
-    map_method 'scheduled_end_date', 'scheduled_finish'
+    map_method 'start_date', 'scheduled_start'
+    map_method 'end_date', 'scheduled_finish'
+    map_method 'actual_start_date', 'actual_start'
+    map_method 'actual_end_date', 'actual_finish'
 
     # Older mappings preserved for now
     map_method 'start_time', 'actual_start'
@@ -25,7 +25,7 @@ module Collective
         # The Collective docs show this as "ScheduledStart"
         args[:ScheduleStart] = {MinimumDate: dates[0], MaximumDate: dates[1]}
       end
-      data = Collective::Job.jobs_get(args)
+      data = self.jobs_get(args)
       #TODO: nil items
       tasks = []
       if data[:@record_count].to_i > 0
@@ -33,11 +33,12 @@ module Collective
           Collective::Task.new(p[:job])
         end
       end
-      tasks
+
+      tasks += get_related_content(args, Task)
     end
 
     def self.find(id)
-      data = Collective::Job.jobs_detail_get({JobID: id})
+      data = self.jobs_detail_get({JobID: id})
       Task.new(data[:job])
     end
 
