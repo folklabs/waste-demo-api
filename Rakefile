@@ -1,7 +1,7 @@
 require 'rspec/core/rake_task'
 require 'dotenv/tasks'
 
-desc 'run tests'
+desc 'Run tests'
 RSpec::Core::RakeTask.new :specs do |task|
   task.pattern = Dir['spec/api/*_spec.rb']
 end

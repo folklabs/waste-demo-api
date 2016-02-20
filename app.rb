@@ -48,7 +48,7 @@ configure :development do
 end
 
 # 4 week time period
-DEFAULT_TIME_PERIOD = 60*60*24*28
+DEFAULT_TIME_PERIOD = 60 * 60 * 24 * 28
 past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s)
 future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
 
@@ -125,14 +125,6 @@ helpers do
     adapter
   end
 
-  def session
-    case ENV['SYSTEM']
-    when 'collective'
-      Collective::Session.new
-    when 'powersuite'
-      Powersuite::Session.new
-    end
-  end
 end
 
 
@@ -151,6 +143,7 @@ get '/' do
 end
 
 get '/doc' do
+  @uprn = ENV['TEST_UPRN']
   jbuilder :'doc/index'
 end
 
@@ -175,14 +168,14 @@ end
 
 
 get '/event-types' do
-  clazz = WasteSystem::Session.get.resource_class(request.path_info)
-  @event_types = clazz.all(params)
+  klass = WasteSystem::Session.get.resource_class(request.path_info)
+  @event_types = klass.all(params)
   respond_with_collection(@event_types, { name: 'event-types', serializer: EventTypeSerializer })
 end
 
 
 get '/event-types/:id' do
-  clazz = WasteSystem::Session.get.resource_class(request.path_info)
+  klass = WasteSystem::Session.get.resource_class(request.path_info)
   @event_type = feature_class.find(params[:id])
   respond_with_item(EventTypeSerializer, @event_type)
 end
@@ -203,15 +196,15 @@ end
 
 
 get '/feature-types' do
-  clazz = WasteSystem::Session.get.resource_class(request.path_info)
-  @collection = clazz.all(params)
+  klass = WasteSystem::Session.get.resource_class(request.path_info)
+  @collection = klass.all(params)
   respond_with_collection(@collection, { name: 'feature-types', serializer: FeatureTypeSerializer })
 end
 
 
 get '/feature-types/:id' do
-  clazz = WasteSystem::Session.get.resource_class(request.path_info)
-  @item = clazz.find(params[:id])
+  klass = WasteSystem::Session.get.resource_class(request.path_info)
+  @item = klass.find(params[:id])
   respond_with_item(FeatureTypeSerializer, @item)
 end
 
