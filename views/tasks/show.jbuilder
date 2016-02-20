@@ -1,1 +1,0 @@
-json.partial! 'tasks/_task', task: @task, show_events: true

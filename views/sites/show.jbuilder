@@ -1,1 +1,0 @@
-json.partial! 'sites/_site', site: @site
