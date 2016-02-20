@@ -48,9 +48,7 @@ configure :development do
 end
 
 # 4 week time period
-DEFAULT_TIME_PERIOD = 60 * 60 * 24 * 28
-past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s)
-future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
+DEFAULT_TIME_PERIOD = 60 * 60 * 24 * 21
 
 
 config_file 'config.yml'
@@ -60,69 +58,42 @@ helpers do
     @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
   end
 
-  def collections_in_date_range(uprn, start_date, end_date)
-    tasks = Collective::Api::Task.all({'UPRN'=> uprn, 'schedule_start'=> "#{start_date},#{end_date}", 'Jobs_Bounds' =>'', 'show_events' => 'true'})
-  end
-
-  def filter_tasks(tasks, service, start_date, end_date)
-    matched_tasks = tasks.select do |task|
-      is_valid = false
-      task_start_time = task.scheduled_start_date
-      if task_start_time >= start_date and task_start_time <= end_date
-        service.feature_types.each do |ct|
-          is_valid = true if task.name.downcase.include?(ct.name.downcase)
-        end
-      end
-      is_valid
-    end
-  end
-
-  def collections_in_date_range_by_service(uprn, service, start_date, end_date)
-    tasks = collections_in_date_range(uprn, start_date, end_date)
-    matched_tasks = tasks.select do |task|
-      is_valid = false
-      service.feature_types.each { |ct| is_valid = true if task.name.downcase.include?(ct.name.downcase) }
-      is_valid
-    end
-  end
-
-  def filter_last_collections(tasks, service)
-      past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s)
-      tasks = filter_tasks(tasks, service, past_date, DateTime.now)
-  end
-
-  def filter_next_collections(tasks, service)
-    future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s)
-    tasks = filter_tasks(tasks, service, DateTime.now, future_date)
-  end
-
   def respond_with_collection(items, opts)
     opts[:request] = request
     adapter = select_adapter
     json CollectionSerializer.new(items, opts, adapter).to_hash
   end
 
-  def respond_with_item(serializer_class, item, opts = {})
+  def respond_with_item(item, serializer_class, opts = {})
     opts[:request] = request
     adapter = select_adapter
     json serializer_class.new(item, opts, adapter).to_hash
   end
 
-  def select_adapter
-    adapter = Oat::Adapters::Hydra
-    request.accept.each do |type|
+  def select_adapter    
+    adapters = request.accept.map do |type|
       case type.to_s
       when 'application/json-ld'
-        # This is default
+        Oat::Adapters::Hydra
       when 'application/vnd.api+json'
-        adapter = Oat::Adapters::JsonAPI
+        Oat::Adapters::JsonAPI
       when 'application/vnd.siren+json'
-        adapter = Oat::Adapters::Siren
+        Oat::Adapters::Siren
       when 'application/hal+json'
-        adapter = Oat::Adapters::HAL
+        Oat::Adapters::HAL
       end
     end
-    adapter
+    adapter = adapters.first || Oat::Adapters::Hydra
+  end
+
+  # Filter by a time range to include at least one past or future task
+  def get_filtered_tasks(params)
+    past_date = DateTime.parse((Time.now - DEFAULT_TIME_PERIOD).to_s).to_s
+    params['start_date'] = past_date unless params['start_date']
+    future_date = DateTime.parse((Time.now + DEFAULT_TIME_PERIOD).to_s).to_s
+    params['end_date'] = future_date unless params['end_date']
+    task_class = WasteSystem::Session.get.resource_class("/tasks")
+    task_class.all(params)
   end
 
 end
@@ -149,105 +120,101 @@ end
 
 
 get '/services' do
-  if params['uprn']
-    @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
-  end
+  @tasks = get_filtered_tasks(params) if params['uprn']
   @services = WasteSystem::Session.get.services(settings, params)
-
-  respond_with_collection(@services, { name: 'services', serializer: WasteServiceSerializer })
+  respond_with_collection(@services, name: 'services', serializer: WasteServiceSerializer, tasks: @tasks)
 end
 
 
 get '/services/:id' do
-  if params['uprn']
-    @tasks = collections_in_date_range(params['uprn'], past_date, future_date)
-  end
-  @service = Hashie::Mash.new(settings.services[params['id'].to_i])
-  respond_with_item(WasteServiceSerializer, @service)
+  @tasks = get_filtered_tasks(params) if params['uprn']
+  services = WasteSystem::Session.get.services(settings, params)
+  @service = services.find { |s| s.id == params['id'] }
+  respond_with_item(@service, WasteServiceSerializer, tasks: @tasks)
 end
 
 
 get '/event-types' do
   klass = WasteSystem::Session.get.resource_class(request.path_info)
   @event_types = klass.all(params)
-  respond_with_collection(@event_types, { name: 'event-types', serializer: EventTypeSerializer })
+  respond_with_collection(@event_types, name: 'event-types', serializer: EventTypeSerializer)
 end
 
 
 get '/event-types/:id' do
   klass = WasteSystem::Session.get.resource_class(request.path_info)
   @event_type = feature_class.find(params[:id])
-  respond_with_item(EventTypeSerializer, @event_type)
+  respond_with_item(@event_type, EventTypeSerializer)
 end
 
 
 get '/events' do
   event_class = WasteSystem::Session.get.resource_class(request.path_info)
   @events = event_class.all(params)
-  respond_with_collection(@events, { name: 'events', serializer: WasteEventSerializer })
+  respond_with_collection(@events, name: 'events', serializer: WasteEventSerializer)
 end
 
 
 get '/events/:id' do
   event_class = WasteSystem::Session.get.resource_class(request.path_info)
   @event = event_class.find(params[:id])
-  respond_with_item(WasteEventSerializer, @event)
+  respond_with_item(@event, WasteEventSerializer)
 end
 
 
 get '/feature-types' do
   klass = WasteSystem::Session.get.resource_class(request.path_info)
   @collection = klass.all(params)
-  respond_with_collection(@collection, { name: 'feature-types', serializer: FeatureTypeSerializer })
+  respond_with_collection(@collection, name: 'feature-types', serializer: FeatureTypeSerializer)
 end
 
 
 get '/feature-types/:id' do
   klass = WasteSystem::Session.get.resource_class(request.path_info)
   @item = klass.find(params[:id])
-  respond_with_item(FeatureTypeSerializer, @item)
+  respond_with_item(@item, FeatureTypeSerializer)
 end
 
 
 get '/features' do
   feature_class = WasteSystem::Session.get.resource_class(request.path_info)
   @collection = feature_class.all(params)
-  respond_with_collection(@collection, { name: 'features', serializer: FeatureSerializer })
+  respond_with_collection(@collection, name: 'features', serializer: FeatureSerializer)
 end
 
 
 get '/features/:id' do
   feature_class = WasteSystem::Session.get.resource_class(request.path_info)
   @feature = feature_class.find(params[:id])
-  respond_with_item(FeatureSerializer, @feature)
+  respond_with_item(@feature, FeatureSerializer)
 end
 
 
 get '/sites' do
   site_class = WasteSystem::Session.get.resource_class(request.path_info)
   @sites = site_class.all(params)
-  respond_with_collection(@sites, { name: 'sites', serializer: SiteSerializer })
+  respond_with_collection(@sites, name: 'sites', serializer: SiteSerializer)
 end
 
 
 get '/sites/:id' do
   site_class = WasteSystem::Session.get.resource_class(request.path_info)
   @site = site_class.find(params[:id])
-  respond_with_item(SiteSerializer, @site)
+  respond_with_item(@site, SiteSerializer)
 end
 
 
 get '/tasks' do
   task_class = WasteSystem::Session.get.resource_class(request.path_info)
   @tasks = task_class.all(params)
-  respond_with_collection(@tasks, { name: 'tasks', serializer: TaskSerializer } )
+  respond_with_collection(@tasks, name: 'tasks', serializer: TaskSerializer)
 end
 
 
 get '/tasks/:id' do
   task_class = WasteSystem::Session.get.resource_class(request.path_info)
   @task = task_class.find(params[:id])
-  respond_with_item(TaskSerializer, @task)
+  respond_with_item(@task, TaskSerializer)
 end
 
 

@@ -8,10 +8,6 @@ module Collective
     def initialize
       super(ENV['COLLECTIVE_URL'])
       @auth_token = get_token
-      # # @client = Savon.client(wsdl: ENV['COLLECTIVE_URL'], log:true, log_level: :debug, pretty_print_xml: true) do
-      # @client = Savon.client(wsdl: ENV['COLLECTIVE_URL']) do
-      #   convert_request_keys_to :none
-      # end
     end
 
     def get_token
@@ -24,15 +20,11 @@ module Collective
     def call(method, message = {})
       # Insert auth token into request message
       message[:token] = @auth_token
-      response = @client.call(method, message: message)
-      
-      response_data = response.body[:"#{method}_response"]
-      # puts response_data
-      result = response_data[:"#{method}_result"]
+      super(method, message)
     end
 
     def services(settings, params)
-      services = settings.collective['services'].map { |s| Hashie::Mash.new(s) }
+      services = settings.collective['services'].map { |s| Service.new(Hashie::Mash.new(s)) }
     end
   end
 end

@@ -12,19 +12,11 @@ module Collective
     map_method 'actual_start_date', 'actual_start'
     map_method 'actual_end_date', 'actual_finish'
 
-    # Older mappings preserved for now
-    map_method 'start_time', 'actual_start'
-    map_method 'scheduled_time', 'scheduled_start'
-
-
     def self.all(args = {})
       Base.process_params(args)
-      if args['schedule_start']
-        dates = args['schedule_start'].split(',')
-        args.delete('schedule_start')
-        # The Collective docs show this as "ScheduledStart"
-        args[:ScheduleStart] = {MinimumDate: dates[0], MaximumDate: dates[1]}
-      end
+      # Map a generic DateRange parameter to ScheduleStart that is used for 
+      # Collective job filtering.
+      convert_argument(args, :DateRange, :ScheduleStart)
       data = self.jobs_get(args)
       #TODO: nil items
       tasks = []
