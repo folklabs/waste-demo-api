@@ -3,6 +3,8 @@ json.set! 'description', "A common API for local government waste services."
 
 # json.organizations "#{request.base_url}organizations"
 json.services "#{request.base_url}/services"
+json.case_types "#{request.base_url}/case-types"
+json.cases "#{request.base_url}/cases"
 json.event_types "#{request.base_url}/event-types"
 json.events "#{request.base_url}/events"
 json.feature_types "#{request.base_url}/feature-types"

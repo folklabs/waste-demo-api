@@ -145,6 +145,19 @@ get '/services/:id' do
 end
 
 
+get '/cases' do
+  klass = WasteSystem::Session.get.resource_class(request.path_info)
+  @collection = klass.all(params)
+  respond_with_collection(@collection, name: 'cases', serializer: CaseSerializer)
+end
+
+get '/case-types' do
+  klass = WasteSystem::Session.get.resource_class(request.path_info)
+  @collection = klass.all(params)
+  respond_with_collection(@collection, name: 'case-types', serializer: CaseTypeSerializer)
+end
+
+
 get '/event-types' do
   klass = WasteSystem::Session.get.resource_class(request.path_info)
   @event_types = klass.all(params)
