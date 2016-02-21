@@ -22,14 +22,6 @@ require "hashie"
 require "log_buddy"
 require 'active_support/inflector'
 
-require 'serializers/collection'
-require 'serializers/event_type'
-require 'serializers/feature'
-require 'serializers/feature_type'
-require 'serializers/site'
-require 'serializers/waste_event'
-require 'serializers/waste_service'
-require 'serializers/task'
 
 require 'oat/adapters/hal'
 require 'oat/adapters/json_api'
@@ -40,6 +32,7 @@ require 'oat_hydra/adapters/hydra'
 require 'waste_system'
 require 'collective'
 require 'powersuite'
+require 'serializers'
 
 
 # 3 week time period
