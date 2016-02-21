@@ -10,6 +10,7 @@ gem "hashie"
 gem 'dotenv'
 gem 'savon', '~> 2.0'
 gem "sinatra-cross_origin", "~> 0.3.1"
+gem 'log_buddy'
 
 gem 'oat'
 gem 'oat_hydra', :git => 'https://github.com/pmackay/oat_hydra.git'
@@ -17,7 +18,6 @@ gem 'oat_hydra', :git => 'https://github.com/pmackay/oat_hydra.git'
 group :development do
   gem "better_errors"
   gem "binding_of_caller"
-  gem 'log_buddy'
 end
 
 group :test, :development do
