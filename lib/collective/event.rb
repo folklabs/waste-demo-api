@@ -10,8 +10,10 @@ module Collective
       data = self.premises_events_get(args)
       events = create_api_objects(data, Collective::Event, :event)
 
-      data = self.premises_detail_get(UPRN: args[:UPRN])
-      usrn = data[:usrn]
+      if args[:UPRN]
+        data = self.premises_detail_get(UPRN: args[:UPRN])
+        usrn = data[:usrn]
+      end
       data = self.streets_events_get(USRN: usrn)
       street_events = create_api_objects(data, Collective::Event, :event)
       events += street_events
@@ -28,6 +30,7 @@ module Collective
     def event_type
       @json[:event_type][:description]
     end
+    alias description event_type
 
     def task_id
       @json[:job][:id] if @json[:job]

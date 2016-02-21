@@ -4,30 +4,13 @@ module Collective
   class Address < Base
     include WasteSystem::Address
 
-    def paon
-      @json[:address2]
-    end
-
-    def saon
-      @json[:address1]
-    end
-
-    def street
-      @json[:street]
-    end
-
-    def locality
-      @json[:locality]
-    end
-
-    def town
-      @json[:town]
-    end
-
-    def postcode
-      @json[:post_code]
-    end
-
+    map_method 'paon', 'address2'
+    map_method 'saon', 'address1'
+    map_method 'street'
+    map_method 'locality'
+    map_method 'town'
+    map_method 'county'
+    map_method 'postcode', 'post_code'
   end
 end
 
