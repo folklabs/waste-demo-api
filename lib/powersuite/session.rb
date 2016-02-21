@@ -10,16 +10,13 @@ module Powersuite
     end
 
     def call(method, message = {})
-      # Insert auth token into body
       if message[:_wrapper]
         new_message = Hash.new
         new_message[message[:_wrapper]] = message
         message.delete(:_wrapper)
         message = new_message
       end
-      response = @client.call(method, message: message)
-      response_data = response.body[:"#{method}_response"]
-      result = response_data[:"#{method}_result"]
+      super(method, message)
     end
 
     def services(settings, params)

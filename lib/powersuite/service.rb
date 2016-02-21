@@ -4,6 +4,7 @@ module Powersuite
     map_method 'id', 'service_id'
     map_method 'name', 'service_name'
     map_method 'description', 'service_description'
+    map_method 'frequency'
 
     def self.all(args = {})
       Base.process_params(args)
@@ -29,6 +30,10 @@ module Powersuite
         end
       end
       feature_types
+    end
+
+    def task_matches(task)
+      return task.name == name
     end
 
   end

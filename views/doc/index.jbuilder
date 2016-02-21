@@ -9,3 +9,9 @@ json.feature_types "#{request.base_url}/feature-types"
 json.features "#{request.base_url}/features"
 json.sites "#{request.base_url}/sites"
 json.tasks "#{request.base_url}/tasks"
+
+json.examples do
+  json.services_by_uprn "#{request.base_url}/services?uprn=#{@uprn}"
+  json.tasks_by_uprn "#{request.base_url}/tasks?uprn=#{@uprn}"
+  json.events_by_uprn "#{request.base_url}/events?uprn=#{@uprn}"
+end

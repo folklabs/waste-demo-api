@@ -7,6 +7,7 @@ module WasteSystem
       text = "#{saon}, #{text}" if saon
       text = "#{text}, #{locality}" if locality
       text = "#{text}, #{town}" if town
+      text = "#{text}, #{county}" if county
       text = "#{text}, #{postcode}" if postcode
     end
 

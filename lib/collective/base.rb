@@ -3,7 +3,7 @@ require 'waste_system'
 module Collective
   class Base < WasteSystem::Base
 
-    def self.method_missing(m, *args, &block)  
+    def self.method_missing(m, *args, &block)
       session = Collective::Session.new
       args = {} if args.size == 0
       args = args[0] if args.size == 1
@@ -15,7 +15,7 @@ module Collective
         'postcode': :'Postcode',
         'uprn': :'UPRN',
         'usrn': :'USRN',
-        'include_related': :'IncludeRelated',
+        'include': :'IncludeRelated',
       }
     
     attr_accessor :type
@@ -23,6 +23,21 @@ module Collective
     def initialize(json)
       @json = json
       @type = self.class.name
+    end
+
+    def self.create_api_objects(data, clazz, json_key)
+      items = []
+      if data[:@record_count].to_i == 1
+        # Single object is given if just one, otherwise its a list
+        items = [clazz.new(data[json_key])]
+      elsif data[:@record_count].to_i > 1
+        data = data[json_key]
+        data = data.values[0] if data.class == Hash
+        items = data.map do |p|
+          clazz.new(p)
+        end
+      end
+      items
     end
 
     def extract_data(data, property)
@@ -34,6 +49,8 @@ module Collective
     # Adjusts HTTP parameters from lowercase REST API format to whatever 
     # Collective requires.
     def self.process_params(params)
+      halt 400 if params['include'] && params['include'] != 'related'
+
       PARAMS_MAP.each_pair do |key, value|
         convert_argument(params, key, value)
       end

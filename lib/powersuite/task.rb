@@ -24,8 +24,8 @@ module Powersuite
 
       tasks = []
       if data[:error_code].to_i == 0
-        tasks = data[:collections][:collection].map do |p|
-          Task.new(p)
+        tasks = data[:collections][:collection].map do |data|
+          Task.new(data, args[:Uprn])
         end
       end
 
@@ -49,12 +49,21 @@ module Powersuite
     def self.find(id)
     end
 
+    def initialize(data, uprn)
+      super(data)
+      @uprn = uprn
+    end
+
     def id
       "#{@json[:round].sub(/ /, '-')}-#{start_date}"
     end
 
     def start_date
       Date.parse(@json[:date]).iso8601
+    end
+
+    def location
+      Site.find(@uprn)
     end
 
   end

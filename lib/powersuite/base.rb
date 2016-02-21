@@ -13,6 +13,16 @@ module Powersuite
       @type = self.class.name
     end
 
+    def self.create_api_objects(data, clazz, json_key)
+      items = []
+      data = data[json_key]
+      data = data.values[0] if data.class == Hash
+      items = data.map do |p|
+        clazz.new(p)
+      end
+      items
+    end
+
     def self.method_missing(m, *args, &block)  
       session = Powersuite::Session.new
       args = {} if args.size == 0
@@ -37,14 +47,7 @@ module Powersuite
         params[:DateRange] = { MinimumDate: dates[0], MaximumDate: dates[1] }
       end
     end
-    
-    # def to_s
-    #   self.class
-    # end
 
-    # def to_ary
-    #   [self.class]
-    # end
   end
 end
 

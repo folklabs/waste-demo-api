@@ -1,11 +1,11 @@
 require 'waste_system'
 
-module Collective
+module Powersuite
   class Address < Base
     include WasteSystem::Address
 
     def paon
-      @json[:site_address2]
+      @json[:site_address_number]
     end
 
     def saon
@@ -13,7 +13,7 @@ module Collective
     end
 
     def street
-      @json[:site_street]
+      @json[:site_address2]
     end
 
     def locality
@@ -21,7 +21,11 @@ module Collective
     end
 
     def town
-      @json[:site_town]
+      @json[:site_town] || @json[:site_city]
+    end
+
+    def county
+      @json[:site_county]
     end
 
     def postcode

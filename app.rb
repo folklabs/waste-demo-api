@@ -19,6 +19,7 @@ require 'sinatra/jbuilder'
 require 'ostruct'
 require "yaml"
 require "hashie"
+require "log_buddy"
 require 'active_support/inflector'
 
 require 'serializers/collection'
@@ -41,17 +42,31 @@ require 'collective'
 require 'powersuite'
 
 
-configure :development do
-  require "better_errors"
-  use BetterErrors::Middleware
-  BetterErrors.application_root = __dir__
-end
-
-# 4 week time period
+# 3 week time period
 DEFAULT_TIME_PERIOD = 60 * 60 * 24 * 21
 
 
 config_file 'config.yml'
+
+
+configure :development do
+  require "better_errors"
+  use BetterErrors::Middleware
+  BetterErrors.application_root = __dir__
+
+  log_file = File.new("#{settings.root}/log/#{settings.environment}.log", 'a+')
+  log_file.sync = true
+  use Rack::CommonLogger, log_file
+  # $stdout.reopen(log_file)
+  # $stderr.reopen(log_file)
+  # WasteSystem::Session.logger = logger
+end
+
+
+configure do
+  enable :cross_origin
+end
+
 
 helpers do
   def base_url
@@ -107,7 +122,10 @@ before do
   unless header_auth_valid or param_auth_valid
     # halt 403
   end
+
+  LogBuddy.init :logger => logger
 end
+
 
 get '/' do
   redirect to('/doc')

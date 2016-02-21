@@ -7,11 +7,12 @@ module Collective
     def self.all(args = {})
       Base.process_params(args)
 
-      events = []
       data = self.premises_events_get(args)
       events = create_api_objects(data, Collective::Event, :event)
 
-      data = self.streets_events_get(args)
+      data = self.premises_detail_get(UPRN: args[:UPRN])
+      usrn = data[:usrn]
+      data = self.streets_events_get(USRN: usrn)
       street_events = create_api_objects(data, Collective::Event, :event)
       events += street_events
     end

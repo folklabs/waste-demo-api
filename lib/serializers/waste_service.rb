@@ -4,7 +4,8 @@ class WasteServiceSerializer < Oat::Serializer
     type "WasteService"
     link :self, href: "#{context[:request].base_url}/services/#{item.id}"
 
-    map_properties :id, :name, :description, :frequency
+    map_properties :id, :name, :description
+    map_properties :frequency if item.frequency
 
     if item.respond_to?(:esd_url)
       map_properties :esd_url
